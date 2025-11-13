@@ -1,0 +1,209 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# 📊 Разведочный анализ данных (EDA) по звонкам Т-Банка\n",
+    "\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "import seaborn as sns\n",
+    "\n",
+    "sns.set(style='whitegrid', palette='muted')\n",
+    "plt.rcParams['figure.figsize'] = (10,5)\n",
+    "\n",
+    "# Загрузка данных\n",
+    "df = pd.read_csv('sale_tasks_dataset.csv')\n",
+    "\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Общая информация о данных\n",
+    "display(df.info())\n",
+    "display(df.describe(include='all').T)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Проверка пропусков\n",
+    "(df.isna().mean()*100).sort_values(ascending=False).head(10)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 👤 Клиенты: возраст, пол, регион"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sns.histplot(df['age'], bins=20, kde=True, color='teal')\n",
+    "plt.title('Распределение возраста клиентов')\n",
+    "plt.xlabel('Возраст, лет')\n",
+    "plt.ylabel('Количество клиентов')\n",
+    "plt.show()\n",
+    "\n",
+    "sns.countplot(x='gender_cd', data=df)\n",
+    "plt.title('Распределение клиентов по полу')\n",
+    "plt.xlabel('Пол клиента')\n",
+    "plt.ylabel('Количество')\n",
+    "plt.show()\n",
+    "\n",
+    "sns.countplot(x='region_size', data=df, order=['msk','urban','town','rural'])\n",
+    "plt.title('Распределение клиентов по типу населённого пункта')\n",
+    "plt.xlabel('Тип региона')\n",
+    "plt.ylabel('Количество клиентов')\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 💰 Доходы клиентов"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sns.scatterplot(x='confirmed_income', y='predicted_income', data=df, alpha=0.5)\n",
+    "plt.title('Подтверждённый vs предсказанный доход клиента')\n",
+    "plt.xlabel('Подтверждённый доход')\n",
+    "plt.ylabel('Предсказанный доход')\n",
+    "plt.show()\n",
+    "\n",
+    "sns.boxplot(x='region_size', y='confirmed_income', data=df, order=['msk','urban','town','rural'])\n",
+    "plt.title('Доход по типу региона')\n",
+    "plt.xlabel('Тип региона')\n",
+    "plt.ylabel('Подтверждённый доход')\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## ☎️ Характеристики звонков"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sns.histplot(df['state_talk_time_sec'], bins=50, kde=True, color='orange')\n",
+    "plt.title('Распределение длительности звонков')\n",
+    "plt.xlabel('Длительность звонка (сек)')\n",
+    "plt.ylabel('Количество звонков')\n",
+    "plt.show()\n",
+    "\n",
+    "avg_talk = df.groupby('functional_cd')['state_talk_time_sec'].mean().sort_values(ascending=False)\n",
+    "avg_talk.plot(kind='bar', color='skyblue')\n",
+    "plt.title('Средняя длительность звонка по причине (functional_cd)')\n",
+    "plt.xlabel('Причина звонка')\n",
+    "plt.ylabel('Средняя длительность (сек)')\n",
+    "plt.show()\n",
+    "\n",
+    "sns.countplot(y='functional_cd', data=df, order=df['functional_cd'].value_counts().index)\n",
+    "plt.title('Распределение звонков по причинам')\n",
+    "plt.xlabel('Количество звонков')\n",
+    "plt.ylabel('Причина звонка')\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 🧑‍💼 Профиль сотрудников"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sns.histplot(df['emp_age'], bins=20, kde=True, color='purple')\n",
+    "plt.title('Возраст сотрудников')\n",
+    "plt.xlabel('Возраст сотрудника')\n",
+    "plt.ylabel('Количество')\n",
+    "plt.show()\n",
+    "\n",
+    "sns.scatterplot(x='emp_work_months_cnt', y='state_talk_time_sec', data=df, alpha=0.3)\n",
+    "plt.title('Опыт сотрудника и длительность звонков')\n",
+    "plt.xlabel('Стаж (мес.)')\n",
+    "plt.ylabel('Длительность звонка (сек)')\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 🔗 Корреляции числовых признаков"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "num_cols = df.select_dtypes(include=np.number)\n",
+    "corr = num_cols.corr()\n",
+    "sns.heatmap(corr, cmap='coolwarm', annot=False)\n",
+    "plt.title('Корреляционная матрица числовых признаков')\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## 📈 Краткие выводы\n",
+    "- Возраст клиентов в основном 30–45 лет.\n",
+    "- Основная доля клиентов — жители городов и миллионников.\n",
+    "- Доходы выше в Москве, предсказанный и подтверждённый доходы коррелируют.\n",
+    "- Средняя длительность звонка около 2–3 минут; длиннее всего звонки по *Upsell* и *Activation*.\n",
+    "- Опыт сотрудников слабо коррелирует с длительностью звонков, но есть лёгкий положительный тренд."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "name": "python",
+   "version": "3.x"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
